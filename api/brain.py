@@ -9,7 +9,9 @@ from typing import List
 from time import sleep
 import pickle
 import os
+from dotenv import load_dotenv  
 
+load_dotenv()
 
 class Brain:
     COMPLETIONS_MODEL = "gpt-3.5-turbo"
