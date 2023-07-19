@@ -12,9 +12,9 @@ import os
 
 
 class Brain:
-    COMPLETIONS_MODEL = "text-davinci-003"
+    COMPLETIONS_MODEL = "gpt-3.5-turbo"
     EMBEDDING_MODEL = "text-embedding-ada-002"
-    openai.api_key = os.getenv("OPENAI_KEY")
+    openai.api_key = os.environ.get("OPENAI_KEY")
     @backoff.on_exception(backoff.expo, (RateLimitError, ServiceUnavailableError))
     def get_embedding(self, text: str, model: str=EMBEDDING_MODEL, idx: int=0) -> list[float]:
         result = openai.Embedding.create(
@@ -73,34 +73,20 @@ class Brain:
             pickle.dump(self.consumed_files, fp)
         with open('textfile.obj', 'wb') as fp:
             pickle.dump(self.text, fp)
-        
     def process_file(self, filename, delim="\n\n"):
         self.reload_models()
         if filename not in self.consumed_files:
-            update = open (filename, "r").read().split(delim)
+            update = open(filename, "r").read().split(delim)
             self.text = self.update_text_embeddings(self.context_embeddings, self.text, update)
             self.consumed_files.add(filename)
             with open('nyush_embeddings.obj', 'wb') as fp:
-            	pickle.dump(self.context_embeddings, fp)
+                pickle.dump(self.context_embeddings, fp)
             with open('consumed_files.obj', 'wb') as fp:
-            	pickle.dump(self.consumed_files, fp)
+                pickle.dump(self.consumed_files, fp)
             with open('textfile.obj', 'wb') as fp:
-            	pickle.dump(self.text, fp)
-            
+                pickle.dump(self.text, fp)
         else:
             print("File already processed")
-    # document_embeddings = self.load_embeddings("olympics_sections_document_embeddings.csv")
-
-    # context_embeddings = self.compute_doc_embeddings(df)
-
-    # context_embeddings = self.compute_text_embeddings(text)
-    # with open('nyush_embeddings.obj', 'wb') as fp:
-    # 	pickle.dump(context_embeddings, fp)
-    # print(len(context_embeddings))
-
-    # update = open ("update.txt", "r").read().split("\n\n")
-
-    # text = self.update_text_embeddings(context_embeddings, text, update)
 
 
     def vector_similarity(self, x: List[float], y: List[float]) -> float:
@@ -199,12 +185,15 @@ class Brain:
                     f.write(f"{line}")
                 f.flush()
 
-        response = openai.Completion.create(
-                    prompt=prompt,
-                    **self.COMPLETIONS_API_PARAMS
-                )
+        completion = openai.ChatCompletion.create(
+            model=self.COMPLETIONS_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{prompt}"}
+            ]
+        )
 
-        return response["choices"][0]["text"].strip(" \n")
+        return completion.choices[0].message['content']
 
 
     # answer= answer_query_with_context("How old was he when he won?",text, context_embeddings, previous_context)

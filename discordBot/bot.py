@@ -1,14 +1,17 @@
 import os
 import asyncio
 import requests
-import interactions  
+import interactions
+from dotenv import load_dotenv  
 import json
 
-TOKEN = os.getenv('DISCORD_TOKEN')
+
+load_dotenv()
+TOKEN = os.environ.get('DISCORD_TOKEN')
 API_SERVER = "http://127.0.0.1:8001"
 tracked_threads = []
-GUILD_NUM = os.getenv('GUILD_NUM')
-client = interactions.Client(token=TOKEN)
+GUILD_NUM = os.environ.get('GUILD_NUM')
+client = interactions.Client(token=TOKEN, ssl=False)
 
 @client.event
 async def on_ready():
@@ -76,6 +79,7 @@ def thread_done(history):
     description="Ask a query for the tutor!",
     scope=GUILD_NUM,
 )
+
 @interactions.option(
     name="text",
     description="What is your question?",
