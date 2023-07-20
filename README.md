@@ -1,3 +1,14 @@
+# New Development Branch
+
+This branch is the continued work on the Hackathon project, GPT Tutor, with the objective of making it a general purpose bot that is able to answer questions based off any documents.
+Currently, I'm testing it out on financial documents, such as Annual/Quarterly Reports and Earning calls.
+
+## Objectives
+
+1. Implement feature to embed document of any kind. We start with Financial documents and SEC filings.
+
+### Hackathon reference below
+
 <h1>
   <img src="assets/logo.png" alt="alt text" width="50" height="50">
   GPTutor
