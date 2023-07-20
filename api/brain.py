@@ -17,6 +17,14 @@ class Brain:
     COMPLETIONS_MODEL = "gpt-3.5-turbo"
     EMBEDDING_MODEL = "text-embedding-ada-002"
     openai.api_key = os.environ.get("OPENAI_KEY")
+
+
+    """
+    text_file: main data file
+    consumed_files: the document embeddings of the main file
+    
+    
+    """
     @backoff.on_exception(backoff.expo, (RateLimitError, ServiceUnavailableError))
     def get_embedding(self, text: str, model: str=EMBEDDING_MODEL, idx: int=0) -> list[float]:
         result = openai.Embedding.create(
@@ -75,6 +83,7 @@ class Brain:
             pickle.dump(self.consumed_files, fp)
         with open('textfile.obj', 'wb') as fp:
             pickle.dump(self.text, fp)
+
     def process_file(self, filename, delim="\n\n"):
         self.reload_models()
         if filename not in self.consumed_files:
