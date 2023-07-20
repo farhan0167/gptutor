@@ -32,6 +32,7 @@ async def get_history(channel):
     history = []
     for i, message in reversed(list(enumerate(message_history))):
         content = message.referenced_message.content if i == (len(message_history) - 1) else message.content
+        print("Content: ",content)
         if message.author == await client.get_self_user():
             if content.startswith("I don't know") or content.startswith("Hello") or content.startswith('Thanks for confirming'):
                 continue
@@ -43,6 +44,7 @@ async def get_history(channel):
             history.append(" A: " + content)
         else:
             history.append(" Q: " + content)
+    
     return history
 
 #this is for the post request to interact with LLM

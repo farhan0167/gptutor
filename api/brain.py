@@ -21,10 +21,14 @@ class Brain:
 
     """
     text_file: main data file
-    consumed_files: the document embeddings of the main file
-    
-    
+    consumed_files: this is currently not being used but it referencess the training data directory
+    context_embeddings: these are the context embeddings of the text_file
     """
+    text_file_path = 'files/textfile.obj'
+    context_embeddings_file_path = 'files/context_embeddings_file.obj'
+
+
+
     @backoff.on_exception(backoff.expo, (RateLimitError, ServiceUnavailableError))
     def get_embedding(self, text: str, model: str=EMBEDDING_MODEL, idx: int=0) -> list[float]:
         result = openai.Embedding.create(
@@ -72,16 +76,16 @@ class Brain:
     consumed_files = set()
     context_embeddings = {}
     def reload_models(self):
-        self.text = pickle.load(open('textfile.obj', "rb"))
-        self.consumed_files = pickle.load(open('consumed_files.obj', "rb"))
-        self.context_embeddings = pickle.load(open('nyush_embeddings.obj', "rb"))
+        self.text = pickle.load(open(self.text_file_path, "rb"))
+        #self.consumed_files = pickle.load(open('consumed_files.obj', "rb"))
+        self.context_embeddings = pickle.load(open(self.context_embeddings_file_path, "rb"))
         
     def save_models(self):
-        with open('nyush_embeddings.obj', 'wb') as fp:
+        with open(self.context_embeddings_file_path, 'wb') as fp:
             pickle.dump(self.context_embeddings, fp)
-        with open('consumed_files.obj', 'wb') as fp:
-            pickle.dump(self.consumed_files, fp)
-        with open('textfile.obj', 'wb') as fp:
+        """with open('consumed_files.obj', 'wb') as fp:
+            pickle.dump(self.consumed_files, fp)"""
+        with open(self.text_file_path, 'wb') as fp:
             pickle.dump(self.text, fp)
 
     def process_file(self, filename, delim="\n\n"):
@@ -90,7 +94,7 @@ class Brain:
             update = open(filename, "r").read().split(delim)
             self.text = self.update_text_embeddings(self.context_embeddings, self.text, update)
             self.consumed_files.add(filename)
-            with open('nyush_embeddings.obj', 'wb') as fp:
+            with open('context_embeddings_file.obj', 'wb') as fp:
                 pickle.dump(self.context_embeddings, fp)
             with open('consumed_files.obj', 'wb') as fp:
                 pickle.dump(self.consumed_files, fp)
@@ -125,7 +129,7 @@ class Brain:
 
     
     
-    MAX_SECTION_LEN = 500
+    MAX_SECTION_LEN = 5000 #This model's maximum context length is 4097 tokens
     SEPARATOR = "\n\n* "
 
     tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
